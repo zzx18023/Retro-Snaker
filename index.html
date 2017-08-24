@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>Document</title>
+		<script src="js/jquery-3.2.1.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/Retro Snaker.js" type="text/javascript" charset="utf-8"></script>
+		<style type="text/css">
+			#RetroSnaker {
+				/*width: 100%;*/
+				background-color: #eee;
+				border: 1px solid salmon;
+				box-sizing: border-box;
+			}
+		</style>
+	</head>
+
+	<body>
+		<canvas id="RetroSnaker" width="400" height="300" tabindex="0"></canvas>
+		<p id="integral">0</p>
+		<script type="text/javascript">
+			if(navigator.userAgent.match(/AppleWebKit.*Mobile.*/) ) {
+				alert('因监听键盘事件请使用PC打开')
+			}
+
+			var retroSnaker = new RetroSnaker(40, 30);
+			console.log(retroSnaker);
+
+			var c = $('#RetroSnaker');
+			var ctx = c[0].getContext("2d");
+			ctx.scale(10, 10);
+
+			retroSnaker.on('update', function() {
+				ctx.clearRect(0, 0, 40, 30);
+				retroSnaker.body.forEach(function(v, i) {
+					if(i == 0) {
+						ctx.fillStyle = "#FF0000";
+					} else {
+						ctx.fillStyle = "#FF5555";
+					}
+					ctx.fillRect(v.x, v.y, 1, 1);
+				});
+				ctx.fillStyle = "#00FF00";
+				retroSnaker.food.forEach(function(v, i) {
+					ctx.fillRect(v.x, v.y, 1, 1);
+				});
+			});
+			retroSnaker.trigger('update');
+
+			retroSnaker.on('collision.body', function() {
+				console.log('碰撞身体');
+				retroSnaker.reset();
+			});
+			retroSnaker.on('collision.boundary', function() {
+				console.log('碰撞边界');
+				retroSnaker.reset();
+			});
+			var integral = 0;
+			retroSnaker.on('collision.food', function(foodindex) {
+				console.log('碰撞食物', foodindex);
+				retroSnaker.addBody();
+				retroSnaker.food.splice(foodindex, 1);
+				retroSnaker.addfood();
+				$('#integral').html(++integral);
+			});
+
+			$('#RetroSnaker').on('keydown', function(event) {
+				switch(event.originalEvent.which) {
+					case 37:
+						console.log('←');
+						retroSnaker.setdirection(3);
+						break;
+					case 38:
+						console.log('↑');
+						retroSnaker.setdirection(0);
+						break;
+					case 39:
+						console.log('→');
+						retroSnaker.setdirection(1);
+						break;
+					case 40:
+						console.log('↓');
+						retroSnaker.setdirection(2);
+						break;
+					default:
+						break;
+				};
+			});
+
+			$('#RetroSnaker').on('focus', function(event) {
+				$(this).data('t', setInterval(function() {
+					retroSnaker.go();
+				}, 200));
+				console.log('开始游戏');
+			});
+			$('#RetroSnaker').on('blur', function(event) {
+				clearTimeout($(this).data('t'));
+				console.log('暂停游戏');
+			});
+
+			retroSnaker.on('reset', function() {
+				for(var i = 0; i < 5; i++) {
+					retroSnaker.addBody();
+				};
+				retroSnaker.addfood();
+				integral = 0;
+				$('#integral').html(integral);
+			});
+			retroSnaker.trigger('reset');
+		</script>
+	</body>
+
+</html>
