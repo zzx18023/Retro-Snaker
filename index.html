@@ -21,8 +21,8 @@
 		<canvas id="RetroSnaker" width="400" height="300" tabindex="0"></canvas>
 		<p id="integral">0</p>
 		<script type="text/javascript">
-			if(navigator.userAgent.match(/AppleWebKit.*Mobile.*/) ) {
-				alert('因监听键盘事件请使用PC打开')
+			if(navigator.userAgent.match(/AppleWebKit.*Mobile.*/)) {
+				//				alert('因监听键盘事件请使用PC打开')
 			}
 
 			var retroSnaker = new RetroSnaker(40, 30);
@@ -67,6 +67,8 @@
 			});
 
 			$('#RetroSnaker').on('keydown', function(event) {
+				event.preventDefault();//我也不知道为啥阻止不了滚动条，可能浏览器有限制，
+				event.stopPropagation();
 				switch(event.originalEvent.which) {
 					case 37:
 						console.log('←');
@@ -87,7 +89,15 @@
 					default:
 						break;
 				};
+				return false;
 			});
+			$(document).on('keyup keypress keydown touchmove', function(event) {
+				event.preventDefault();
+				event.stopPropagation();
+				return false;
+			});
+
+			
 
 			$('#RetroSnaker').on('focus', function(event) {
 				$(this).data('t', setInterval(function() {
